@@ -108,7 +108,7 @@ html * {
 	width: 30px !important;
 	height: 30px !important;
 	margin: 1px;
-	background: linear-gradient(#D8D8D8, #A4A4A4); 
+	background: linear-gradient(#D8D8D8, #A4A4A4);
 	border-radius: 5px;
 	text-align:center;
 	font-weight: bold;
@@ -158,4 +158,15 @@ html * {
 
 #honor-tbl{
 	margin-top:1cm;
+}
+
+.sound{
+	position: absolute;
+	display: inline-block;
+	float: left;
+	margin-left: 0.5cm;
+}
+
+#volume{
+	width: 0.9cm;
 }

@@ -10,6 +10,7 @@ var boardHeight = 0;
 var username = "";
 var password = "";
 
+var sound_on = true;
 
 //**************************************
 // FUNÇÕES GERAIS
@@ -289,7 +290,8 @@ function clickPop(x, y){
 
 	else if (board[y][x] == -1) { // caso seja uma bomba
 		var audio = new Audio("content/audio/explosion.wav");
-		audio.play();
+		if(sound_on)
+			audio.play();
 		$("div[data-column='" +x+"'][data-row='"+y+"']").css("color","red"); // marca como vermelho o botão clicado
 		revealBombs(); //revela todas as minas
 		$("#game-lose").fadeIn();
@@ -444,7 +446,7 @@ function initMPGame(){
 	sse = new EventSource( "http://twserver.alunos.dcc.fc.up.pt:8000"+'/update?name=' + username + '&game=' + multiplayer.game_id + '&key=' + multiplayer.key);
 	sse.onmessage = function(event){
 		var msg = JSON.parse(event.data);
-		
+
 		//sucesso
 		if(msg.error === undefined){
 
@@ -472,7 +474,7 @@ function initMPGame(){
 
 			multiplayer.mybombs = 0;
 			multiplayer.opbombs = 0;
-			
+
 			// gerar tabela
 			$("#game-board").html(makeTable(boardWidth, boardHeight));
 			$("#game-board").css("width", boardWidth*31);
@@ -534,7 +536,7 @@ function update(){
 					$("#game-win").fadeIn();
 					$("#mpBack").show();
 				}
-				
+
 			}
 			if(msg.turn !== undefined) {
 				multiplayer.turn = msg.turn;
@@ -572,7 +574,7 @@ function mpReveal(cell, me){
 	var count = cell[2];
 	if (count === 0){
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html(" "); //se a célula for = 0, mostra botão vazio
-		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("disable");		
+		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("disable");
 	}
 	//bomba
 	else if (count === -1){
@@ -591,7 +593,7 @@ function mpReveal(cell, me){
 	}
 	else{
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html(count); //caso contrário mostra o valor da cela (numero de minas circundantes)
-		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("disable");		
+		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("disable");
 		$("div[data-column='" +x+"'][data-row='"+y+"']").css("color", colors[count]);
 
 	}
@@ -613,7 +615,7 @@ function notify(line, column){
 			//sucesso
 			if(msg.error === undefined)
 				update(sse);
-			
+
 			//erro
 			else
 				alert(msg.error);
@@ -677,6 +679,7 @@ function score(){
 $(document).ready(function() {
 
 	// esconder html desnecessário
+	$("#volume").hide();
 	$("#prompt").hide();
 	$("#stop-waiting").hide();
 	$("#mp-progress").hide();
@@ -709,6 +712,17 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#volume").click(function(){
+		if(sound_on){
+			$("#volume").html('<i class="fa fa-volume-off"></i>');
+			sound_on = false;
+		}
+			else{
+			$("#volume").html('<i class="fa fa-volume-up"></i>');
+			sound_on = true;
+		}
+	});
+
 	// click no botão de convidado
 	$("#convidado").click(function() {
 		$("#login").hide();
@@ -728,6 +742,7 @@ $(document).ready(function() {
 	//---------- JQuery para o menu principal -------------------
 	// click no botão de start
 	$("#start").click(function() {
+			$("#volume").show();
 		//verifica se o modo multiplayer está selecionado
 	  	if($("#multiplayer").is(':checked')){
 		    if($('input[name=difficulty]:checked').val() == 1) multiplayer.level = "beginner";
@@ -780,7 +795,7 @@ $(document).ready(function() {
 
 
 	//---------- JQuery para o quadro de honra -------------------
-	
+
 	//mudança de tabela
 	$("#hshow0").click(function() {
 			t = 0;
@@ -910,6 +925,7 @@ $(document).ready(function() {
 
 	//voltar para o menu
 	$("#backToMenu").click(function(){
+		$("#volume").hide();
 		$("#game-win").hide();
 		$("#game-lose").hide();
 		$("#afterGame").hide();
@@ -927,7 +943,7 @@ $(document).ready(function() {
 		$("#mpBack").hide();
 		$("#start").attr("disabled", false);
 		$("#title").show();
-		$("#menu").show();	
+		$("#menu").show();
 	});
 
 
