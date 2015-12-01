@@ -53,12 +53,41 @@ html * {
 }
 
 #mp-progress {
-	margin: 1cm;
+	margin: 0.5cm;
+	font-size: 150%;
+}
+
+#myName {
+	text-align: right;
+	color: #B8C9FF;
+
+}
+
+.turn{
+	font-weight: bold;
+}
+
+#opName {
+	text-align: left;
+	color: #FF9292;
+}
+
+#score {
+	text-align: center;
+	color: #D8D8D8;
+}
+
+#myscore {
+	color: #B8C9FF;
+}
+
+#opscore {
+	color: #FF9292;
 }
 
 #ptext {
 	text-align: left;
-	vertical-align: center;
+	vertical-align: middle;
 }
 
 #pbutton {

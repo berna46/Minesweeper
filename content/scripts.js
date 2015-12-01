@@ -10,7 +10,7 @@ var boardHeight = 0;
 var username = "";
 var password = "";
 
-var score = 0;
+
 //**************************************
 // FUNÇÕES GERAIS
 // *************************************
@@ -346,7 +346,7 @@ function endGame(){
 var isMultiplayer = false;
 var sse;
 var promptTimer;
-var multiplayer = {game_id: "", key: "", group: 38, turn: "", opponent: "", level: ""};
+var multiplayer = {game_id: "", key: "", group: 38, turn: "", opponent: "", level: "", mybombs: 0, opbombs: 0};
 
 
 // *************************************
@@ -370,11 +370,12 @@ function register(){
 			if(msg.error === undefined){
 				// mostrar mensagem de sucesso
 				promptTimer = setInterval(function(){$("#prompt").fadeOut(); clearInterval(promptTimer);}, 3000);
+				$("#ptext").html("Login com sucesso.");
+				$("#prompt").fadeIn();
 
 				// esconder menu de login e mostrar menu principal
 				$("#login").hide();
 				$("#menu").fadeIn();
-				//$("#prompt").fadeIn();
 			}
 			else {
 				// mostrar mensagem de erro
@@ -406,7 +407,7 @@ function join(){
 
 					$("#start").attr("disabled", true);
 					// mostrar mensagem de espera..
-					$("#prompt-text").html("À espera de um oponente...");
+					$("#ptext").html("À espera de um oponente...");
 					clearInterval(promptTimer);
 					$("#prompt").fadeIn();
 					// mostrar botão de desistir da espera
@@ -443,7 +444,7 @@ function initMPGame(){
 	sse = new EventSource( "http://twserver.alunos.dcc.fc.up.pt:8000"+'/update?name=' + username + '&game=' + multiplayer.game_id + '&key=' + multiplayer.key);
 	sse.onmessage = function(event){
 		var msg = JSON.parse(event.data);
-
+		
 		//sucesso
 		if(msg.error === undefined){
 
@@ -468,11 +469,20 @@ function initMPGame(){
 				boardWidth = 30;
 				boardHeight = 16;
 			}
-
+			
 			// gerar tabela
 			$("#game-board").html(makeTable(boardWidth, boardHeight));
 			$("#game-board").css("width", boardWidth*31);
-			$("#mp-progress").html("Oponente: "+multiplayer.opponent+" | Turno: "+multiplayer.turn);
+			$("#myName").html(username);
+			$("#opName").html(multiplayer.opponent);
+				if (multiplayer.turn == username) {
+					$("#myName").addClass("turn");
+					$("#opName").removeClass("turn");
+				}
+				else {
+					$("#opName").addClass("turn");
+					$("#myName").removeClass("turn");
+				}
 			$("#mp-progress").fadeIn();
 			$("#game-board").fadeIn();
 
@@ -508,11 +518,21 @@ function update(){
 				else
 					$("#game-win").fadeIn();
 				}
-				//endMPGame();
 			}
-			if(msg.turn !== undefined)
+			if(msg.turn !== undefined) {
 				multiplayer.turn = msg.turn;
-			$("#mp-progress").html("Oponente: "+multiplayer.opponent+" | Turno: "+multiplayer.turn);
+				if (multiplayer.turn == username) {
+					$("#myName").addClass("turn");
+					$("#opName").removeClass("turn");
+				}
+				else {
+					$("#opName").addClass("turn");
+					$("#myName").removeClass("turn");
+				}
+			}
+			$("#myscore").html(multiplayer.mybombs);
+			$("#opscore").html(multiplayer.opbombs);
+
 		 }
 		 //ERRO
 		else
@@ -527,15 +547,20 @@ function mpReveal(cell, me){
 	var count = cell[2];
 	if (count === 0)
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html(" "); //se a célula for = 0, mostra botão vazio
-
+	
 	//bomba
-	else if (count === -1)
+	else if (count === -1){
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html("<i class='fa fa-bomb'></i>"); // se for mina, mostra ícone da mina
+		if (me)
+			multiplayer.mybombs += 1;
+		else
+			multiplayer.opbombs += 1;
 
+	}
 	else
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html(count); //caso contrário mostra o valor da cela (numero de minas circundantes)
 		//$("div[data-column='" +x+"'][data-row='"+y+"']").css("color", colors[board[y][x]]);
-
+	
 	//faz disable ao botão
 	if (me)
 		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("me");
@@ -557,8 +582,8 @@ function notify(line, column){
 		success: function(msg){
 			//sucesso
 			if(msg.error === undefined)
-				update();
-
+				update(sse);
+			
 			//erro
 			else
 				alert(msg.error);
@@ -566,7 +591,7 @@ function notify(line, column){
 	});
 }
 
-//todo
+// TODO
 function ranking(){
 	var xhr = $.ajax({
 		type: "POST",
@@ -589,7 +614,7 @@ function ranking(){
 		}
 	});
 }
-// todo
+// TODO
 function score(){
 	var shr = $.ajax({
 		type: "POST",
@@ -605,7 +630,7 @@ function score(){
 			//sucesso
 			if(msg.error === undefined){
 				console.log("Success");
-				score = msg.score;
+				var score = msg.score;
 			}
 			//erro
 			else
@@ -632,8 +657,6 @@ $(document).ready(function() {
 	$("#honor-scr").hide();
 	$("#game-win").hide();
 	$("#game-lose").hide();
-
-
 	//---------- JQuery para o menu de login -------------------
 	// quando o utilizador altera username
 	$("#usr").on("input", null, null, function() {
@@ -675,11 +698,11 @@ $(document).ready(function() {
 	// click no botão de start
 	$("#start").click(function() {
 		//verifica se o modo multiplayer está selecionado
-	  if($("#multiplayer").is(':checked')){
-		  if($('input[name=difficulty]:checked').val() == 1) multiplayer.level = "beginner";
-		  else if($('input[name=difficulty]:checked').val() == 2) multiplayer.level = "intermediate";
-  		else multiplayer.level = "expert";
-		  isMultiplayer = true;
+	  	if($("#multiplayer").is(':checked')){
+		    if($('input[name=difficulty]:checked').val() == 1) multiplayer.level = "beginner";
+		    else if($('input[name=difficulty]:checked').val() == 2) multiplayer.level = "intermediate";
+		    else multiplayer.level = "expert";
+		    isMultiplayer = true;
 		    // tenta entrar num jogo multiplayer
 			join();
 	   	}
@@ -694,7 +717,6 @@ $(document).ready(function() {
 			$("#game-board").html(makeTable(boardWidth, boardHeight));
 			$("#game-board").css("width", boardWidth*31); //definir o tamanho do tabuleiro para poder centrar no ecra
 			$("#game-board").fadeIn();
-			$("#start").attr("disabled", false);
 		}
 	});
 
@@ -727,7 +749,7 @@ $(document).ready(function() {
 
 
 	//---------- JQuery para o quadro de honra -------------------
-
+	
 	//mudança de tabela
 	$("#hshow0").click(function() {
 			t = 0;
