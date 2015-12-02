@@ -40,6 +40,10 @@ html * {
 	margin-right: 35%;
 }
 
+#gsel {
+	margin: 0.2cm;
+}
+
 #progress, #afterGame {
 	text-align: right;
 	margin-right: 1cm;
@@ -92,6 +96,7 @@ html * {
 #ptext {
 	text-align: left;
 	vertical-align: middle;
+	z-index: 100;
 }
 
 #pbutton {
@@ -165,6 +170,7 @@ html * {
 	display: inline-block;
 	float: left;
 	margin-left: 0.5cm;
+	z-index: 10;
 }
 
 #volume{

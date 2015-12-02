@@ -12,6 +12,15 @@ var password = "";
 
 var sound_on = true;
 
+var honor = [new Array(), new Array(), new Array(), new Array(), new Array(), new Array()];
+// carregar as entradas da localStorage, caso existam
+if (!(localStorage.getItem("beginner") === null))
+	honor[0] = strToHonor(localStorage.getItem("beginner"));
+if (!(localStorage.getItem("intermediate") === null))
+	honor[1] = strToHonor(localStorage.getItem("intermediate"));
+if (!(localStorage.getItem("expert") === null))
+	honor[2] = strToHonor(localStorage.getItem("expert"));
+
 //**************************************
 // FUNÇÕES GERAIS
 // *************************************
@@ -35,7 +44,26 @@ function makeTable(w, h){
 
 	return tbl;
 }
-
+function makeHonorTable(g, t){
+		t = t + (g * 3);
+		var tbl = '<table class="table table-striped"><thead><tr><th>Username</th><th>Tempo</th></tr></thead><tbody>';
+		if (honor[t].length > 0) {
+			if (honor[t].length < 10) { //caso não hajam 15 elementos na lista
+				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['name']+'</th><th>'+honor[t][0]['score']+'</th></tr>';
+				for(var i = 1; i < honor[t].length; i++){
+					tbl += '<tr><th>'+honor[t][i]['name']+'</th><th>'+honor[t][i]['score']+'</th></tr>';
+				}
+			}
+			else {
+				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['name']+'</th><th>'+honor[t][0]['score']+'</th></tr>';
+				for(var i = 1; i < 10; i++){
+					tbl += '<tr><th>'+honor[t][i]['name']+'</th><th>'+honor[t][i]['score']+'</th></tr>';
+				}
+			}
+		}
+		tbl+='</tbody></table>';
+		return tbl;
+}
 
 // *************************************
 // VARIÁVEIS SINGLEPLAYER
@@ -56,6 +84,10 @@ if (!(localStorage.getItem("intermediate") === null))
 	honor[1] = strToHonor(localStorage.getItem("intermediate"));
 if (!(localStorage.getItem("expert") === null))
 	honor[2] = strToHonor(localStorage.getItem("expert"));
+ranking("beginner");
+ranking("intermediate");
+ranking("expert");
+console.log(honor);
 
 
 // *************************************
@@ -91,7 +123,7 @@ function strToHonor(a){
 		var u = tokens[i].split(":")[0];
 		var t = tokens[i].split(":")[1];
 
-		h[i] = { user: u, time: t }
+		h[i] = { name: u, score: t }
 	}
 
 	return h;
@@ -484,7 +516,8 @@ function initMPGame(){
 			$("#opName").html(multiplayer.opponent);
 				if (multiplayer.turn == username) {
 					var audio = new Audio("content/audio/turn.wav");
-					audio.play();
+					if(sound_on)
+						audio.play();
 					$("#myName").addClass("turn");
 					$("#opName").removeClass("turn");
 					$("#myTurn").html("<i class='fa fa-bomb'></i>");
@@ -499,6 +532,7 @@ function initMPGame(){
 				}
 			$("#mp-progress").fadeIn();
 			$("#game-board").fadeIn();
+			$("#volume").show();
 
 			// pedir próximo update
 			update();
@@ -534,7 +568,9 @@ function update(){
 				}
 				else {
 					$("#game-win").fadeIn();
+					$("#stop-waiting").hide();
 					$("#mpBack").show();
+					score();
 				}
 
 			}
@@ -542,7 +578,8 @@ function update(){
 				multiplayer.turn = msg.turn;
 				if (multiplayer.turn == username) {
 					var audio = new Audio("content/audio/turn.wav");
-					audio.play();
+					if(sound_on)
+						audio.play();
 					$("#myName").addClass("turn");
 					$("#opName").removeClass("turn");
 					$("#myTurn").html("<i class='fa fa-bomb'></i>");
@@ -580,7 +617,8 @@ function mpReveal(cell, me){
 	else if (count === -1){
 		$("div[data-column='" +x+"'][data-row='"+y+"']").html("<i class='fa fa-bomb'></i>"); // se for mina, mostra ícone da mina
 		var audio = new Audio("content/audio/explosion.wav");
-		audio.play();
+		if(sound_on)
+			audio.play();
 		if (me){
 			multiplayer.mybombs += 1;
 			$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("me");
@@ -624,12 +662,12 @@ function notify(line, column){
 }
 
 // TODO
-function ranking(){
+function ranking(lvl){
 	var xhr = $.ajax({
 		type: "POST",
 		url: "http://twserver.alunos.dcc.fc.up.pt:8000/ranking",
 		contentType: "application/json",
-		data: JSON.stringify({level: multiplayer.level}),
+		data: JSON.stringify({level: lvl}),
 		error: function(XMLHttpRequest, textStatus, errorThrown){
 			alert(textStatus);
 			alert(errorThrown);
@@ -638,7 +676,9 @@ function ranking(){
 			console.log(msg.error || "OK - ranking");
 			//sucesso
 			if(msg.error === undefined){
-				console.log("Success");
+				if (lvl=="beginner") honor[3] = msg.ranking;
+				else if (lvl=="intermediate") honor[4] = msg.ranking;
+				if (lvl=="expert") honor[5] = msg.ranking;
 			}
 			//erro
 			else
@@ -661,8 +701,10 @@ function score(){
 			console.log(msg.error || "OK - score");
 			//sucesso
 			if(msg.error === undefined){
-				console.log("Success");
 				var score = msg.score;
+				promptTimer = setInterval(function(){$("#prompt").fadeOut(); clearInterval(promptTimer);}, 3000);
+				$("#ptext").html("Parabéns, o seu score agora é "+score+"!");
+				$("#prompt").fadeIn();
 			}
 			//erro
 			else
@@ -691,6 +733,7 @@ $(document).ready(function() {
 	$("#honor-scr").hide();
 	$("#game-win").hide();
 	$("#game-lose").hide();
+
 	//---------- JQuery para o menu de login -------------------
 	// quando o utilizador altera username
 	$("#usr").on("input", null, null, function() {
@@ -713,15 +756,15 @@ $(document).ready(function() {
 	});
 
 	$("#volume").click(function(){
-		if(sound_on){
-			$("#volume").html('<i class="fa fa-volume-off"></i>');
-			sound_on = false;
-		}
-			else{
-			$("#volume").html('<i class="fa fa-volume-up"></i>');
-			sound_on = true;
-		}
-	});
+	if(sound_on){
+		$("#volume").html('<i class="fa fa-volume-off"></i>');
+		sound_on = false;
+	}
+		else{
+		$("#volume").html('<i class="fa fa-volume-up"></i>');
+		sound_on = true;
+	}
+});
 
 	// click no botão de convidado
 	$("#convidado").click(function() {
@@ -742,7 +785,6 @@ $(document).ready(function() {
 	//---------- JQuery para o menu principal -------------------
 	// click no botão de start
 	$("#start").click(function() {
-			$("#volume").show();
 		//verifica se o modo multiplayer está selecionado
 	  	if($("#multiplayer").is(':checked')){
 		    if($('input[name=difficulty]:checked').val() == 1) multiplayer.level = "beginner";
@@ -754,6 +796,7 @@ $(document).ready(function() {
 	   	}
 	   	//singleplayer
 		else{
+			$("#volume").show();
 			isMultiplayer = false;
 			$("#menu").hide();
 			$("#title").hide();
@@ -772,26 +815,12 @@ $(document).ready(function() {
 		//geração do quadro de honra default (singleplayer beginner)
 		// mostra 10 elementos melhor classificados
 		var t = 0;
-		var tbl = '<table class="table table-striped"><thead><tr><th>Username</th><th>Tempo</th></tr></thead><tbody>';
-		if (honor[t].length > 0) {
-			if (honor[t].length < 10) { //caso não hajam 15 elementos na lista
-				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['user']+'</th><th>'+honor[t][0]['time']+'</th></tr>';
-				for(var i = 1; i < honor[t].length; i++){
-					tbl += '<tr><th>'+honor[t][i]['user']+'</th><th>'+honor[t][i]['time']+'</th></tr>';
-				}
-			}
-			else {
-				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['user']+'</th><th>'+honor[t][0]['time']+'</th></tr>';
-				for(var i = 1; i < 10; i++){
-					tbl += '<tr><th>'+honor[t][i]['user']+'</th><th>'+honor[t][i]['time']+'</th></tr>';
-				}
-			}
-		}
-		tbl+='</tbody></table>';
-		$("#honor-tbl").html(tbl);
+		var g = 0;
+		$("#honor-tbl").html(makeHonorTable(g, t));
 		$("#honor-scr").fadeIn();
 	});
 	var t = 0;
+	var g = 0;
 
 
 	//---------- JQuery para o quadro de honra -------------------
@@ -807,25 +836,16 @@ $(document).ready(function() {
 			t = 2;
 	});
 
+	$("#hsingle").click(function() {
+			g = 0;
+	});
+	$("#hmulti").click(function(){
+			g = 1;
+	});
+
 	//geração de tabela
 	$(".hb").click(function() {
-		var tbl = '<table class="table table-striped"><thead><tr><th>Username</th><th>Tempo</th></tr></thead><tbody>';
-		if (honor[t].length > 0) {
-			if (honor[t].length < 15) { //caso não hajam 15 elementos na lista
-				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['user']+'</th><th>'+honor[t][0]['time']+'</th></tr>';
-				for(var i = 1; i < honor[t].length; i++){
-					tbl += '<tr><th>'+honor[t][i]['user']+'</th><th>'+honor[t][i]['time']+'</th></tr>';
-				}
-			}
-			else {
-				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['user']+'</th><th>'+honor[t][0]['time']+'</th></tr>';
-				for(var i = 1; i < 15; i++){
-					tbl += '<tr><th>'+honor[t][i]['user']+'</th><th>'+honor[t][i]['time']+'</th></tr>';
-				}
-			}
-		}
-		tbl+='</tbody></table>';
-		$("#honor-tbl").html(tbl);
+		$("#honor-tbl").html(makeHonorTable(g, t));
 	});
 
 	// click no botão de voltar atrás
@@ -860,7 +880,7 @@ $(document).ready(function() {
 						acorde(x, y);
 		            //verificar vitória
 		            if (checkWin()) {
-									insertHonor({user: username, time: timeSpent}, gameDifficulty); //inserir no quadro de honra
+									insertHonor({name: username, score: timeSpent}, gameDifficulty); //inserir no quadro de honra
 									$("#game-win").fadeIn();
 		            	endGame(); //terminar jogo
 		            }
@@ -935,6 +955,7 @@ $(document).ready(function() {
 	});
 
 	$("#mpBack").click(function(){
+		$("#volume").hide();
 		$("#login-btn").attr("disabled", false);
 		$("#game-win").hide();
 		$("#game-lose").hide();
