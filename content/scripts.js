@@ -673,7 +673,7 @@ function ranking(lvl){
 			alert(errorThrown);
 		},
 		success: function(msg){
-			console.log(msg.error || "OK - ranking");
+			//console.log("OK - ranking");
 			//sucesso
 			if(msg.error === undefined){
 				if (lvl=="beginner") honor[3] = msg.ranking;
@@ -698,7 +698,7 @@ function score(){
 			alert(errorThrown);
 		},
 		success: function(msg){
-			console.log(msg.error || "OK - score");
+			//console.log(msg.error || "OK - score");
 			//sucesso
 			if(msg.error === undefined){
 				var score = msg.score;
