@@ -13,13 +13,7 @@ var password = "";
 var sound_on = true;
 
 var honor = [new Array(), new Array(), new Array(), new Array(), new Array(), new Array()];
-// carregar as entradas da localStorage, caso existam
-if (!(localStorage.getItem("beginner") === null))
-	honor[0] = strToHonor(localStorage.getItem("beginner"));
-if (!(localStorage.getItem("intermediate") === null))
-	honor[1] = strToHonor(localStorage.getItem("intermediate"));
-if (!(localStorage.getItem("expert") === null))
-	honor[2] = strToHonor(localStorage.getItem("expert"));
+
 
 //**************************************
 // FUNÇÕES GERAIS
@@ -46,7 +40,7 @@ function makeTable(w, h){
 }
 function makeHonorTable(g, t){
 		t = t + (g * 3);
-		var tbl = '<table class="table table-striped"><thead><tr><th>Username</th><th>Tempo</th></tr></thead><tbody>';
+		var tbl = '<table class="table table-striped"><thead><tr><th>Username</th><th>Score</th></tr></thead><tbody>';
 		if (honor[t].length > 0) {
 			if (honor[t].length < 10) { //caso não hajam 15 elementos na lista
 				tbl += '<tr><th><i class="fa fa-hand-peace-o"></i>&nbsp;'+honor[t][0]['name']+'</th><th>'+honor[t][0]['score']+'</th></tr>';
@@ -78,12 +72,13 @@ var firstClick = true;
 
 var honor = [new Array(), new Array(), new Array()];
 // carregar as entradas da localStorage, caso existam
-if (!(localStorage.getItem("beginner") === null))
-	honor[0] = strToHonor(localStorage.getItem("beginner"));
-if (!(localStorage.getItem("intermediate") === null))
-	honor[1] = strToHonor(localStorage.getItem("intermediate"));
-if (!(localStorage.getItem("expert") === null))
-	honor[2] = strToHonor(localStorage.getItem("expert"));
+if (localStorage.getItem("beginner") !== undefined)
+	localStorageGet(1);
+if (localStorage.getItem("intermediate") !== undefined)
+	localStorageGet(2);
+if (localStorage.getItem("expert") !== undefined)
+	localStorageGet(3);
+
 ranking("beginner");
 ranking("intermediate");
 ranking("expert");
@@ -94,39 +89,35 @@ console.log(honor);
 // FUNÇÕES SINGLEPLAYER
 // *************************************
 
-// função para converter as arrays do quadro de honra para string
-// para serem guardadas na localStorage
-function honorToStr(a){
-
-	var str = "";
-
-	for (var i = 0; i<a.length - 1; i++){
-		var user = a[i].user;
-		var time = a[i].time.toString();
-
-		str += user +":"+ time+";";
-	}
-
-	str += a[a.length-1].user +":"+a[a.length-1].time;
-
-	return str;
+function localStorageInsert(level){
+  if(level == 1){
+    localStorage.setItem('beginner', JSON.stringify(honor[level-1]));
+  }
+  else if(level == 2){
+    localStorage.setItem('intermediate', JSON.stringify(honor[level-1]));
+  }
+  else{
+    localStorage.setItem('expert', JSON.stringify(honor[level-1]));
+  }
 }
 
-// função para converter as strings na localStorage de volta para array
-function strToHonor(a){
-
-	var h = [];
-
-	var tokens = a.split(";");
-
-	for (var i = 0; i<tokens.length; i++){
-		var u = tokens[i].split(":")[0];
-		var t = tokens[i].split(":")[1];
-
-		h[i] = { name: u, score: t }
+function localStorageGet(level){
+	var tmp = [];
+	var len;
+	if(level === 1)
+     tmp = JSON.parse(localStorage.getItem('beginner'));
+  else if(level === 2)
+     tmp = JSON.parse(localStorage.getItem('intermediate'));
+  else
+     tmp = JSON.parse(localStorage.getItem('expert'));
+	if(tmp === null)
+		len = 0;
+	else {
+		len = tmp.length;
 	}
-
-	return h;
+	for(var i = 0; i < len; i++){
+    honor[level-1].push(tmp[i]);
+  }
 }
 
 // inserir vitória no quadro de honra e colocar o novo quadro na localStorage
@@ -134,16 +125,11 @@ function insertHonor(elem, difficulty){
 
 	var t = difficulty-1;
 
-	for(var i=honor[t].length;i>0 && honor[t][i-1]['time']>elem['time'];i--)
+	for(var i=honor[t].length; i>0 && honor[t][i-1].score>elem.score; i--)
 		honor[t][i]=honor[t][i-1];
 	honor[t][i]=elem;
-
-	if(difficulty == 1)
-		localStorage.setItem("beginner", honorToStr(honor[0]));
-	else if(difficulty == 2)
-		localStorage.setItem("intermediate", honorToStr(honor[1]));
-	else
-		localStorage.setItem("expert", honorToStr(honor[2]));
+	//SET LOCAL STORAGE
+	localStorageInsert(difficulty);
 }
 
 function startGame(difficulty){
@@ -892,7 +878,7 @@ $(document).ready(function() {
 		         	if((popped[y][x]) && leftButtonDown){
 						acorde(x, y);
 		            	if (checkWin()) {
-		            		insertHonor({user: username, time: timeSpent}, gameDifficulty); //inserir no quadro de honra
+		            		insertHonor({name: username, score: timeSpent}, gameDifficulty); //inserir no quadro de honra
 		            	$("#game-win").fadeIn();
 		            		endGame(); //terminar jogo
 		            	}
