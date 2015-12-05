@@ -2,9 +2,16 @@ html * {
 	font-family: 'Montserrat', sans-serif;
 }
 
+
+body {
+	top: 0;
+	position: relative;
+}
+
+
 #title {
 	text-align: center;
-	margin-top: 1cm;
+	padding-top: 1cm;
 	margin-bottom: 1cm;
 }
 
@@ -52,8 +59,15 @@ html * {
 }
 
 #prompt {
+	 z-index: 0;
+	 left: 0;
+	 right: 0;
+	 top: 0;
+	margin: 0.2cm;
+	position: absolute;
 	text-align: right;
-	margin: 0.5cm;
+	background-color: rgba(211, 225, 234, 0.4);
+	
 }
 
 #mp-progress {
@@ -96,7 +110,6 @@ html * {
 #ptext {
 	text-align: left;
 	vertical-align: middle;
-	z-index: 100;
 }
 
 #pbutton {
@@ -170,7 +183,7 @@ html * {
 	display: inline-block;
 	float: left;
 	margin-left: 0.5cm;
-	z-index: 10;
+	
 }
 
 #volume{

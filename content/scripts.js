@@ -21,18 +21,18 @@ var honor = [new Array(), new Array(), new Array(), new Array(), new Array(), ne
 
 // gera html para as tabelas de jogo
 function makeTable(w, h){
-	var tbl = '<div class="container text-center">';
+	var tbl = '<div class="container text-center"><table>';
 	for (var i = 0; i < h; i++) {
-		tbl += '<div class="row">';
+		tbl += '<tr>';
 		for (var j = 0; j < w; j++) {
 			if (isMultiplayer)
 				// botões de multiplayer
-				tbl += '<div class="mp-btn" data-column="'+j+'" data-row="'+i+'"></div>';
+				tbl += '<td><div class="mp-btn" data-column="'+j+'" data-row="'+i+'"></div></td>';
 			else
 				// botões de singleplayer
-				tbl += '<div class="board-btn" data-column="'+j+'" data-row="'+i+'"></div>';
+				tbl += '<td><div class="board-btn" data-column="'+j+'" data-row="'+i+'"></div></td>';
 		}
-		tbl += "</div>";
+		tbl += "</tr>";
 	}
 	tbl += "</div>";
 
@@ -165,7 +165,7 @@ function startGame(difficulty){
 
 // imprime o progresso
 function printProgress(){
-	var progress = "Tempo Decorrido: " + timeSpent + " segundos | Minas por Encontrar: " + minesLeft;
+	var progress = '<i class="fa fa-clock-o fa-lg"></i> ' + timeSpent + " segundos | Minas por Encontrar: " + minesLeft;
 	$("#counters").html(progress);
 }
 
@@ -367,6 +367,7 @@ var isMultiplayer = false;
 var sse;
 var promptTimer;
 var multiplayer = {game_id: "", key: "", group: 38, turn: "", opponent: "", level: "", mybombs: 0, opbombs: 0};
+var won = false;
 
 
 // *************************************
@@ -553,10 +554,10 @@ function update(){
 					$("#mpBack").show();
 				}
 				else {
+					won = true;
 					$("#game-win").fadeIn();
 					$("#stop-waiting").hide();
 					$("#mpBack").show();
-					score();
 				}
 
 			}
@@ -756,6 +757,7 @@ $(document).ready(function() {
 	$("#convidado").click(function() {
 		$("#login").hide();
 		$("#menu").fadeIn();
+		$("#multiplayer").attr("disabled", true);
 		username = "Convidado";
 	});
 
@@ -764,6 +766,7 @@ $(document).ready(function() {
 		//credenciais de login
 	    username = $("#usr").val();
 	    password = $("#pwd").val();
+	    $("#start").attr("disabled", false);
 		register();
 	});
 
@@ -951,6 +954,8 @@ $(document).ready(function() {
 		$("#start").attr("disabled", false);
 		$("#title").show();
 		$("#menu").show();
+		if (won) score();
+		won = false;
 	});
 
 
