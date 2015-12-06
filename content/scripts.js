@@ -1,6 +1,7 @@
 // *************************************
 // VARIÁVEIS GERAIS
 // *************************************
+var totalMines = 0;
 
 var isGame = false;
 var minesLeft = 0;
@@ -138,17 +139,17 @@ function startGame(difficulty){
 	firstClick = true;
 	gameDifficulty = difficulty;
 	if (difficulty == 1) {
-		minesLeft = 10;
+		totalMines = minesLeft = 10;
 		boardWidth = 9;
 		boardHeight = 9;
 	}
 	else if (difficulty == 2) {
-		minesLeft = 40;
+		totalMines = minesLeft = 40;
 		boardWidth = 16;
 		boardHeight = 16;
 	}
 	else if (difficulty == 3) {
-		minesLeft = 99;
+		totalMines = minesLeft = 99;
 		boardWidth = 30;
 		boardHeight = 16;
 	}
@@ -165,7 +166,9 @@ function startGame(difficulty){
 
 // imprime o progresso
 function printProgress(){
-	var progress = '<i class="fa fa-clock-o fa-lg"></i> ' + timeSpent + " segundos | Minas por Encontrar: " + minesLeft;
+	var tmp = totalMines-minesLeft;
+	var progress_bar = '<i class="fa fa-bomb"></i> <progress value="'+ tmp +'" max="'+totalMines+'" style="color:grey"> </progress>';
+	var progress = '<i class="fa fa-clock-o fa-lg"></i> ' + timeSpent + " segundos | "+ progress_bar;
 	$("#counters").html(progress);
 }
 
