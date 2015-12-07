@@ -360,7 +360,7 @@ function explosion(i, j){
 	canvas.id = '#canvas-'+tmp.toString();
 	canvas.width = 30;
 	canvas.height = 30;
-	$("div[data-column='" +j+"'][data-row='"+i+"']") .html("<i class='fa fa-bomb'></i>"+canvas);
+	$("div[data-column='" +j+"'][data-row='"+i+"']") .html("<i class='fa fa-bomb'></i>");
 	//canvas.style.zIndex = "100";
 
 	//canvas = document.getElementById('#canvas');
@@ -650,11 +650,11 @@ function mpReveal(cell, me){
 		if(sound_on)
 			audio.play();
 		if (me){
-			multiplayer.mybombs += 1;
+			multiplayer.mybombs ++;
 			$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("me");
 		}
 		else{
-			multiplayer.opbombs += 1;
+			multiplayer.opbombs ++;
 			$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("opponent");
 		}
 
