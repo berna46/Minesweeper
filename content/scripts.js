@@ -13,6 +13,8 @@ var password = "";
 
 var sound_on = true;
 
+var prev_user = "";
+
 var honor = [new Array(), new Array(), new Array(), new Array(), new Array(), new Array()];
 
 
@@ -511,8 +513,10 @@ function initMPGame(){
 
 		//sucesso
 		if(msg.error === undefined){
-
 			multiplayer.opponent = msg.opponent;
+			var ring = true;
+			if(multiplayer.turn === msg.turn)
+				ring = false;
 			multiplayer.turn = msg.turn;
 
 			// esconder menu
@@ -544,9 +548,9 @@ function initMPGame(){
 			$("#myscore").html("0");
 			$("#opscore").html("0");
 			$("#opName").html(multiplayer.opponent);
-				if (multiplayer.turn == username) {
+				if (multiplayer.turn === username) {
 					var audio = new Audio("content/audio/turn.wav");
-					if(sound_on)
+					if(sound_on && ring)
 						audio.play();
 					$("#myName").addClass("turn");
 					$("#opName").removeClass("turn");
@@ -605,10 +609,13 @@ function update(){
 
 			}
 			if(msg.turn !== undefined) {
+				var ring = true;
+				if(multiplayer.turn === msg.turn)
+					ring = false;
 				multiplayer.turn = msg.turn;
 				if (multiplayer.turn == username) {
 					var audio = new Audio("content/audio/turn.wav");
-					if(sound_on)
+					if(sound_on && ring)
 						audio.play();
 					$("#myName").addClass("turn");
 					$("#opName").removeClass("turn");
