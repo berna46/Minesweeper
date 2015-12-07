@@ -741,7 +741,8 @@ function score(){
 			if(msg.error === undefined){
 				var score = msg.score;
 				promptTimer = setInterval(function(){$("#prompt").fadeOut(); clearInterval(promptTimer);}, 3000);
-				$("#ptext").html("Parabéns, o seu score agora é "+score+"!");
+				$("#ptext").html("O seu score é "+score+"!");
+				$("#stop-waiting").hide();
 				$("#prompt").fadeIn();
 			}
 			//erro
@@ -1005,7 +1006,7 @@ $(document).ready(function() {
 		$("#start").attr("disabled", false);
 		$("#title").show();
 		$("#menu").show();
-		if (won) score();
+		score();
 		won = false;
 	});
 
