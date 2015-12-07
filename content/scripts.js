@@ -310,6 +310,7 @@ function clickPop(x, y){
 			applySearch(y,x,0);
 
 	else if (board[y][x] == -1) { // caso seja uma bomba
+		explosion(y,x);
 		var audio = new Audio("content/audio/explosion.wav");
 		if(sound_on)
 			audio.play();
@@ -351,6 +352,45 @@ function checkWin(){
 		}
 	}
 	return true;
+}
+
+function explosion(i, j){
+	var canvas = document.createElement('canvas');
+	var tmp = (100*(1+i)+j+1);
+	canvas.id = '#canvas-'+tmp.toString();
+	canvas.width = 30;
+	canvas.height = 30;
+	$("div[data-column='" +j+"'][data-row='"+i+"']") .html("<i class='fa fa-bomb'></i>"+canvas);
+	//canvas.style.zIndex = "100";
+
+	//canvas = document.getElementById('#canvas');
+	var dr = canvas.getContext("2d");
+	var frame = 0;
+	var anim_id;
+
+	function explosion_anim() {
+		dr.clearRect(0, 0, 20, 20);
+		if(frame === 5){
+			clearInterval(anim_id);
+
+			var final_image = new Image();
+			final_image.onmousedown = function(event){
+				event.preventDefault();
+				return false;
+			};
+			$("div[data-column='" + j +"'][data-row='"+ i +"']").html("<i class='fa fa-bomb'></i>");
+			return;
+		}
+		dr.drawImage(explosion_image, 39 * frame, 0, 49, 48, 0, 0, 30,30);
+		$("div[data-column='" + j +"'][data-row='"+ i +"']").html(canvas);
+
+		frame ++;
+	}
+	var explosion_image = new Image();
+	explosion_image.onload = function(){
+		anim_id = setInterval(explosion_anim, 84);
+	};
+	explosion_image.src = 'content/imgs/hit.png';
 }
 
 // fim do jogo
@@ -605,7 +645,7 @@ function mpReveal(cell, me){
 	}
 	//bomba
 	else if (count === -1){
-		$("div[data-column='" +x+"'][data-row='"+y+"']").html("<i class='fa fa-bomb'></i>"); // se for mina, mostra ícone da mina
+		explosion(y,x);
 		var audio = new Audio("content/audio/explosion.wav");
 		if(sound_on)
 			audio.play();
@@ -619,8 +659,9 @@ function mpReveal(cell, me){
 		}
 
 	}
+	//caso contrário mostra o valor da cela (numero de minas circundantes)
 	else{
-		$("div[data-column='" +x+"'][data-row='"+y+"']").html(count); //caso contrário mostra o valor da cela (numero de minas circundantes)
+		$("div[data-column='" +x+"'][data-row='"+y+"']").html(count);
 		$("div[data-column='" +x+"'][data-row='"+y+"']").addClass("disable");
 		$("div[data-column='" +x+"'][data-row='"+y+"']").css("color", colors[count]);
 
