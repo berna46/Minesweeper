@@ -67,7 +67,7 @@ body {
 	position: absolute;
 	text-align: right;
 	background-color: rgba(211, 225, 234, 0.4);
-	
+
 }
 
 #mp-progress {
@@ -183,7 +183,7 @@ body {
 	display: inline-block;
 	float: left;
 	margin-left: 0.5cm;
-	
+	z-index: 10;
 }
 
 #volume{
