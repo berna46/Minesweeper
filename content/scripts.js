@@ -262,6 +262,7 @@ function countNeighbours(y, x, f){
 			}
 	return count;
 }
+
 // revela o conteúdo da célula, alterando o html do botão respetivo
 function reveal(x, y){
 	var colors = [".", "blue", "green", "red", "purple", "black"];
@@ -423,7 +424,7 @@ var won = false;
 function register(){
 	var xhr = $.ajax({
 		type: "POST",
-		url: "http://twserver.alunos.dcc.fc.up.pt:8000/register",
+		url: "http://twserver.alunos.dcc.fc.up.pt:8038/register",
 		contentType: "application/json",
 		data: JSON.stringify({name: username, pass: password}),
 		//resposta - erro
@@ -470,7 +471,7 @@ function join(){
 				if(msg.error === undefined){
 					multiplayer.game_id = msg.game;
 					multiplayer.key = msg.key;
-
+					console.log("JOIN game:"+multiplayer.game_id+" key:"+multiplayer.key);
 					$("#start").attr("disabled", true);
 					// mostrar mensagem de espera..
 					$("#ptext").html("À espera de um oponente...");
@@ -499,8 +500,9 @@ function leave(){
 			alert(errorThrown);
         },
     	success: function(msg){
-				if(!(msg.error === undefined))
+				if(msg.error !== undefined)
 					alert(msg.error);
+
     	}
 	});
 }
