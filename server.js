@@ -160,8 +160,14 @@ function clickPop(x, y, game_id){
 			else
 				games[game_id].p2score++;
 			// se o score for maior que metade das bombas no jogo, vitória
-			if (games[game_id].p1score > (games[game_id].mines / 2))
-				sendEvent(game_id, 'win', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'winner':games[game_id].turn});
+			if (games[game_id].p1score > (games[game_id].mines / 2)){
+				sendEvent(game_id, 'end', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'winner':games[game_id].player1});
+				increaseScore(games[game_id].player1, games[game_id].level); decreaseScore(games[game_id].player2, games[game_id].level);
+			}
+			else if (games[game_id].p2score > (games[game_id].mines / 2)){
+				sendEvent(game_id, 'end', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'winner':games[game_id].player2});
+				increaseScore(games[game_id].player2, games[game_id].level); decreaseScore(games[game_id].player1, games[game_id].level);
+			}
 			else
 				sendEvent(game_id, 'move', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'turn':games[game_id].turn});
 
@@ -220,18 +226,81 @@ var mysql = require('mysql');
 // criação da conecção
 var db_con = mysql.createConnection({
 	host : 'localhost',
-	user : 'root',
+	user : 'up201202479',
 	password : 'secret',
 });
 // conecção e selecção da base de dados
 db_con.connect(function(err) {
 	if (err)
 		console.log(err);
-	var query = db_con.query('USE db;', function(err, result) {
+	var query = db_con.query('USE up201202479;', function(err, result) {
 		if (err)
 			console.log(err);
 	});
 });
+
+function increaseScore(name, level){
+	var query = db_con.query('SELECT * FROM Rankings WHERE name = ? && level = ?', [name, level], function(err,result) {
+
+			if (err)
+				console.log(err);
+
+
+			if (result.length > 0){
+				var query = db_con.query('UPDATE Rankings SET score = score + 1 WHERE name = ? && level = ?', [name, level], function(err, result) {
+					if (err)
+						console.log(err);
+
+					console.log("updated score.");
+				});
+			}
+			else{
+				var post = { name : name, score : 1, level : level , timestamp : Date.now()};
+				var query = db_con.query('INSERT INTO Rankings SET ?', [post], function(err, result) {
+					if (err)
+						console.log(err);
+					console.log("Created new ranking");
+					// resposta positiva
+				});
+
+			}
+
+
+	});
+}
+
+function decreaseScore(name, level){
+	var query = db_con.query('SELECT * FROM Rankings WHERE name = ? && level = ?', [name, level], function(err,result) {
+
+			if (err)
+				console.log(err);
+
+
+			if (result.length > 0){
+				if (result[0].score > 0){
+					var query = db_con.query('UPDATE Rankings SET score = score - 1 WHERE name = ? && level = ?', [name, level], function(err, result) {
+						if (err)
+							console.log(err);
+
+						console.log("updated score.");
+					});
+				}
+			}
+			else{
+				var post = { name : name, score : 0, level : level , timestamp : Date.now()};
+				var query = db_con.query('INSERT INTO Rankings SET ?', [post], function(err, result) {
+					if (err)
+						console.log(err);
+					console.log("Created new ranking");
+					// resposta positiva
+				});
+
+			}
+
+
+	});
+}
+
 // chamada ao módulo criptográfico para uso da função MD5
 var crypto = require('crypto');
 // função para criar hashes a partir de password e salt
@@ -378,7 +447,10 @@ app.post('/score', function (request, response) {
 		var query = db_con.query('SELECT * FROM Rankings WHERE name = ? && level = ?', [request.body.name, request.body.level], function(err,result) {
 			if (err)
 				console.log(err);
-			response.json({"score": result[0].score});
+			if (result.length > 0)
+				response.json({"score": result[0].score});
+			else
+				response.json({"score": 0});
 		});
 	}
 	else {
@@ -400,11 +472,11 @@ app.post('/notify', function (request, response) {
 			//verifica os limites da tabela
 			if((row > 0 && row <= games[game_id].boardHeight) && (col >0 && col <= games[game_id].boardWidth)){
 				//célula já destapada
-				if(!games[game_id].popped[row-1][col-1]){
+				if(!games[game_id].popped[col-1][row-1]){
 					console.log("Accepted.");
 					response.json({});//jogada aceite
 					// rebenta casa(s)
-					clickPop(col-1, row-1, game_id);
+					clickPop(row-1, col-1, game_id);
 				}
 				else{
 					response.json({"error": "Posição "+row+","+col+" já destapada"});
@@ -426,7 +498,7 @@ app.get('/update', function (request, response) {
 	var key = request.query.key;
  	if(regex.test(name) && testKey(name, key, game_id)){
  		// impedir que a conecção se feche
-		request.socket.setTimeout(Infinity);
+		request.socket.setTimeout(6000000);
 		// cabecalho da resposta
 		response.writeHead(200, {
 		    'Content-Type': 'text/event-stream',
@@ -454,6 +526,6 @@ app.get('/update', function (request, response) {
 		response.json({"error": "Erro! Não foi possivel validar o pedido"});
 	}
 });
-var server = app.listen(8023, function() {
+var server = app.listen(8038, '0.0.0.0', function() {
 	console.log('Listening at http://%s:%s', server.address().address, server.address().port);
 });

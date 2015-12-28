@@ -459,7 +459,7 @@ function register(){
 function join(){
 	var xhr = $.ajax({
 		type: "POST",
-   		url: "http://twserver.alunos.dcc.fc.up.pt:8000/join",
+   		url: "http://twserver.alunos.dcc.fc.up.pt:8038/join",
 		contentType: "application/json",
 		data: JSON.stringify({name: username, pass: password, level: multiplayer.level, group: multiplayer.group}),
 		//resposta - erro
@@ -491,7 +491,7 @@ function join(){
 function leave(){
 	var xhr = $.ajax({
 		type: "POST",
-    	url: "http://twserver.alunos.dcc.fc.up.pt:8000/leave",
+    	url: "http://twserver.alunos.dcc.fc.up.pt:8038/leave",
 		contentType: "application/json",
 		data: JSON.stringify({name: username, game: multiplayer.game_id, key: multiplayer.key}),
 		//resposta - erro
@@ -509,7 +509,7 @@ function leave(){
 
 // primeiro update, início do jogo multiplayer
 function initMPGame(){
-	sse = new EventSource( "http://twserver.alunos.dcc.fc.up.pt:8000"+'/update?name=' + username + '&game=' + multiplayer.game_id + '&key=' + multiplayer.key);
+	sse = new EventSource( "http://twserver.alunos.dcc.fc.up.pt:8038"+'/update?name=' + username + '&game=' + multiplayer.game_id + '&key=' + multiplayer.key);
 	sse.onmessage = function(event){
 		var msg = JSON.parse(event.data);
 
@@ -682,7 +682,7 @@ function mpReveal(cell, me){
 function notify(line, column){
 	var xhr = $.ajax({
 		type: "POST",
-		url: "http://twserver.alunos.dcc.fc.up.pt:8000/notify",
+		url: "http://twserver.alunos.dcc.fc.up.pt:8038/notify",
 		contentType: "application/json",
 		data: JSON.stringify({name: username, game: multiplayer.game_id, key: multiplayer.key, row: line+1, col: column+1}),
 		error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -705,7 +705,7 @@ function notify(line, column){
 function ranking(lvl){
 	var xhr = $.ajax({
 		type: "POST",
-		url: "http://twserver.alunos.dcc.fc.up.pt:8000/ranking",
+		url: "http://twserver.alunos.dcc.fc.up.pt:8038/ranking",
 		contentType: "application/json",
 		data: JSON.stringify({level: lvl}),
 		error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -730,7 +730,7 @@ function ranking(lvl){
 function score(){
 	var shr = $.ajax({
 		type: "POST",
-		url: "http://twserver.alunos.dcc.fc.up.pt:8000/score",
+		url: "http://twserver.alunos.dcc.fc.up.pt:8038/score",
 		contentType: "application/json",
 		data: JSON.stringify({name: username, level: multiplayer.level}),
 		error: function(XMLHttpRequest, textStatus, errorThrown){
