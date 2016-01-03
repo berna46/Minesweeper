@@ -43,9 +43,9 @@ function testKey(name, key, game_id){
 		for (var i = 0; i < waiting_list.length; i++)
 			if ((waiting_list[i].name == name) && (waiting_list[i].key == key)) found = true;
 	}
-	else 
+	else
 		if (((games[game_id].player1 == name) && (games[game_id].p1key == key)) || ((games[game_id].player2 == name) && (games[game_id].p2key == key))) found = true;
-	
+
 	return found;
 }
 
@@ -160,11 +160,11 @@ function clickPop(x, y, game_id){
 			else
 				games[game_id].p2score++;
 			// se o score for maior que metade das bombas no jogo, vitória
-			if (games[game_id].p1score > (games[game_id].mines / 2)){
+			if (games[game_id].p1score >= (games[game_id].mines / 2)){
 				sendEvent(game_id, 'end', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'winner':games[game_id].player1});
 				increaseScore(games[game_id].player1, games[game_id].level); decreaseScore(games[game_id].player2, games[game_id].level);
 			}
-			else if (games[game_id].p2score > (games[game_id].mines / 2)){
+			else if (games[game_id].p2score >= (games[game_id].mines / 2)){
 				sendEvent(game_id, 'end', {'name':games[game_id].turn, 'cells':[[x+1, y+1, -1]], 'winner':games[game_id].player2});
 				increaseScore(games[game_id].player2, games[game_id].level); decreaseScore(games[game_id].player1, games[game_id].level);
 			}
