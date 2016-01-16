@@ -501,7 +501,9 @@ function leave(){
         },
     	success: function(msg){
 				if(msg.error !== undefined)
-					alert(msg.error);
+				    alert(msg.error);
+	    else
+		event.target.close();
 
     	}
 	});
